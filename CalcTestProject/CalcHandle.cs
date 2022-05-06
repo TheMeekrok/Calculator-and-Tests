@@ -4,18 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace Windows7_Calc
 {
     public class CalcHandle
     {
         private const int MAX_DIGITS = 18;
-        private const int MAX_DIGITS_AFTER_COMMA = 10;
+        private const int MAX_DIGITS_AFTER_COMMA = 9;
 
         public string ActiveVariable { get; private set; } = "0";
         public string PassiveVariable { get; private set; } = "0";
         public string Answer { get; private set; } = "0";
-        //public string Operations { get; private set; } = {}
+
+        //Состояния калькулятора
         private enum State
         {
             N, Addition, Subtraction, Multiplication, Division, Error
@@ -33,6 +35,7 @@ namespace Windows7_Calc
         public bool CanEqual { get; private set; } = false;
         public bool IsPercent { get; private set; } = false;
 
+        //Методы обработки чисел
         public void AddDigit(string Num)
         {
             if (CurrentState == State.Error)
@@ -61,11 +64,11 @@ namespace Windows7_Calc
             ActiveVariable = Num;
         }
 
-        public void AddComma(string Sign)
+        public void AddComma()
         {
             if (ActiveVariable.Length <= MAX_DIGITS && !ActiveVariable.Contains(","))
             {
-                ActiveVariable += Convert.ToString(Sign);
+                ActiveVariable += ",";
             }
         }
 
@@ -140,6 +143,10 @@ namespace Windows7_Calc
             }
         }
 
+        //История операций
+        public ObservableCollection<string> CalcHistory { get; private set; } 
+            = new ObservableCollection<string>();
+
         public void Equals()
         {
             if (CanEqual)
@@ -180,6 +187,8 @@ namespace Windows7_Calc
 
                 ActiveVariable = Answer;
                 PassiveVariable = "0";
+
+                CalcHistory.Add(ActiveVariable);
             }
         }
 
@@ -206,16 +215,59 @@ namespace Windows7_Calc
             else
             {
                 ActiveVariable = Convert.ToString(Math.Round(Math.Sqrt(X), MAX_DIGITS_AFTER_COMMA));
+                CalcHistory.Add(ActiveVariable);
             }    
         }
         public void Reverse()
         {
             double X = Convert.ToDouble(ActiveVariable);
             ActiveVariable = Convert.ToString(Math.Round(1 / X, MAX_DIGITS_AFTER_COMMA));
+            CalcHistory.Add(ActiveVariable);
         }
         public void Percent()
         {
             IsPercent = true;
+        }
+
+        //Число в памяти
+        private string MemoryCell = "0";
+        public void MemoryRead()
+        {
+            if (CurrentMemoryState != MemoryState.IsEmpty)
+            {
+                ActiveVariable = MemoryCell;
+            }
+        }
+        public void MemoryWrite()
+        {
+            MemoryCell = ActiveVariable;
+            CurrentMemoryState = MemoryState.IsFull;
+        }
+        public void MemoryClear()
+        {
+            MemoryCell = "0";
+            CurrentMemoryState = MemoryState.IsEmpty;
+        }
+        private enum MemoryState
+        {
+            IsEmpty, IsFull
+        }
+        private MemoryState CurrentMemoryState = MemoryState.IsEmpty;
+        public void MemoryPlus()
+        {
+            if (CurrentMemoryState == MemoryState.IsFull)
+            {
+                MemoryCell = Convert.ToString(
+                    Convert.ToDouble(MemoryCell) + Convert.ToDouble(ActiveVariable));
+            }
+        }
+        public void MemoryMinus()
+        {
+            if (CurrentMemoryState == MemoryState.IsFull)
+            {
+                MemoryCell = Convert.ToString(
+                    Convert.ToDouble(MemoryCell) - Convert.ToDouble(ActiveVariable));
+            }
         }
     }
 }
