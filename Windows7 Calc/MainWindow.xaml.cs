@@ -92,7 +92,7 @@ namespace Windows7_Calc
         }
         private void Comma_Click(object sender, RoutedEventArgs e)
         {
-            Calc.AddComma((sender as Button).Content.ToString());
+            Calc.AddComma();
             NumUpdate(Calc.ActiveVariable);
         }
         private void Equals_Click(object sender, RoutedEventArgs e)
@@ -231,7 +231,7 @@ namespace Windows7_Calc
             
             if (e.Key == Key.Decimal)
             {
-                Calc.AddComma(",");
+                Calc.AddComma();
             }
 
             if (e.Key == Key.Return)

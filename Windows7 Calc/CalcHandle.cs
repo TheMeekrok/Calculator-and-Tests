@@ -11,7 +11,7 @@ namespace Windows7_Calc
     public class CalcHandle
     {
         private const int MAX_DIGITS = 18;
-        private const int MAX_DIGITS_AFTER_COMMA = 10;
+        private const int MAX_DIGITS_AFTER_COMMA = 9;
 
         public string ActiveVariable { get; private set; } = "0";
         public string PassiveVariable { get; private set; } = "0";
@@ -64,11 +64,11 @@ namespace Windows7_Calc
             ActiveVariable = Num;
         }
 
-        public void AddComma(string Sign)
+        public void AddComma()
         {
             if (ActiveVariable.Length <= MAX_DIGITS && !ActiveVariable.Contains(","))
             {
-                ActiveVariable += Convert.ToString(Sign);
+                ActiveVariable += ",";
             }
         }
 
@@ -171,14 +171,14 @@ namespace Windows7_Calc
                 if (CurrentState == State.Multiplication)
                 {
                     if (IsPercent)
-                        X = Y / 100;
+                        X = X / 100;
                     Answer = Convert.ToString(Math.Round(Y * X, MAX_DIGITS_AFTER_COMMA));
                 }
 
                 if (CurrentState == State.Division)
                 {
                     if (IsPercent)
-                        X = Y / 100;
+                        X = X / 100;
                     Answer = Convert.ToString(Math.Round(Y / X, MAX_DIGITS_AFTER_COMMA));
                 }
 

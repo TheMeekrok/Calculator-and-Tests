@@ -171,14 +171,14 @@ namespace Windows7_Calc
                 if (CurrentState == State.Multiplication)
                 {
                     if (IsPercent)
-                        X = Y / 100;
+                        X = X / 100;
                     Answer = Convert.ToString(Math.Round(Y * X, MAX_DIGITS_AFTER_COMMA));
                 }
 
                 if (CurrentState == State.Division)
                 {
                     if (IsPercent)
-                        X = Y / 100;
+                        X = X / 100;
                     Answer = Convert.ToString(Math.Round(Y / X, MAX_DIGITS_AFTER_COMMA));
                 }
 

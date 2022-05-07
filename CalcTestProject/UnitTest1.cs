@@ -386,7 +386,7 @@ namespace CalcTestProject
             Calc.Percent();
             Calc.Equals();
 
-            Assert.AreEqual("100", Calc.ActiveVariable);
+            Assert.AreEqual("1,006063829", Calc.ActiveVariable);
         }
     }
 }
