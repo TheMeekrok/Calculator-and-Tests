@@ -23,171 +23,159 @@ namespace Windows7_Calc
             InitializeComponent();
         }
 
-        const double MainTextWidth = 293.0;
-        const double MainTextFontSize = 38;
-
-        public void NumUpdate(string Number, bool IsError = false)
+        double MainTextWidth;
+        double MainTextFontSize;
+        private void MainWindow1_Loaded(object sender, EventArgs e)
         {
-            if (IsError)
-            {
-                MainText.Text = "Неверный ввод";
-                return;
-            }
-            MainText.FontSize = Math.Min(MainTextWidth * 1.8 / Number.Length, MainTextFontSize);
-            MainText.Text = Number;
-            HistoryBox.ItemsSource = Calc.CalcHistory;
+            MainTextWidth = MainText.ActualWidth;
+            MainTextFontSize = MainText.FontSize;
+        }
+        public void NumUpdate(double Number)
+        {
+            string Text = Calc.IsError() ? Calc.CurrentError : Number.ToString();
+
+            MainText.FontSize = Math.Min(MainTextWidth * 1.85 / Text.Length, MainTextFontSize);
+            MainText.Text = Text;
         }
         public CalcHandle Calc = new CalcHandle();
-        
+       
         private void B1_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
        
         private void B2_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B3_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B4_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B5_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B6_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B7_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B8_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B9_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void B0_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddDigit((sender as Button).Content.ToString());
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
+        
         private void Comma_Click(object sender, RoutedEventArgs e)
         {
             Calc.AddComma();
-            NumUpdate(Calc.ActiveVariable);
         }
         private void Equals_Click(object sender, RoutedEventArgs e)
         {
-            if (Calc.CanEqual)
-            {
-                HistoryBox.Text += Calc.ActiveVariable + ((Calc.IsPercent) ? "%" : "");
-                Calc.Equals();
-                NumUpdate(Calc.ActiveVariable);
-            }
+            HistoryBox.Text += Calc.CurrNumber.ToString();
+            HistoryBox.Text = "";
+            Calc.Equals();
+            NumUpdate(Calc.Accumulator);
+
+            HistoryBox.ItemsSource = Calc.CalcHistory;
         }
         private void Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (Calc.IsNotBusy())
-            {
-                HistoryBox.Text = Calc.ActiveVariable + " " +
-                    (sender as Button).Content.ToString() + " ";
-                Calc.Addition();
-                NumUpdate(Calc.ActiveVariable);
-            }
+            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString()) 
+                + " " + (sender as Button).Content.ToString() + " ";
+            Calc.Addition();
+            NumUpdate(Calc.Accumulator);
         }
         private void Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (Calc.IsNotBusy())
-            {
-                HistoryBox.Text = Calc.ActiveVariable + " " +
-                    (sender as Button).Content.ToString() + " ";
-                Calc.Subtraction();
-                NumUpdate(Calc.ActiveVariable);
-            }
+            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
+                + " " + (sender as Button).Content.ToString() + " ";
+            Calc.Subtraction();
+            NumUpdate(Calc.Accumulator);
         }
         private void Multiply_Click(object sender, RoutedEventArgs e)
         {
-            if (Calc.IsNotBusy())
-            {
-                HistoryBox.Text = Calc.ActiveVariable + " " +
-                    (sender as Button).Content.ToString() + " ";
-                Calc.Multiplication();
-                NumUpdate(Calc.ActiveVariable);
-            }
+            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
+                + " " + (sender as Button).Content.ToString() + " ";
+            Calc.Multiplication();
+            NumUpdate(Calc.Accumulator);
         }
         private void Divide_Click(object sender, RoutedEventArgs e)
         {
-            if (Calc.IsNotBusy())
-            {
-                HistoryBox.Text = Calc.ActiveVariable + " " +
-                    (sender as Button).Content.ToString() + " ";
-                Calc.Division();
-                NumUpdate(Calc.ActiveVariable);
-            }
+            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
+                + " " + (sender as Button).Content.ToString() + " ";
+            Calc.Division();
+            NumUpdate(Calc.Accumulator);
         }
         private void Plus_Min_Click(object sender, RoutedEventArgs e)
         {
             Calc.SignSwitch();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void Sqrt_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text = (sender as Button).Content.ToString() + Calc.ActiveVariable;
+            HistoryBox.Text += (sender as Button).Content.ToString();
             Calc.Sqrt();
-            NumUpdate(Calc.ActiveVariable, Calc.IsError());
+            NumUpdate(Calc.CurrNumber);
         }
         private void OneDivide_Click(object sender, RoutedEventArgs e)
-        {
-            HistoryBox.Text = "1/" + Calc.ActiveVariable;
+        {/*
+            HistoryBox.Text = "1/" + Calc.Accumulator;
             Calc.Reverse();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.Accumulator);*/
         }
         private void Percent_Click(object sender, RoutedEventArgs e)
-        {
+        {/*
             if (Calc.CanEqual && !Calc.IsPercent)
             {
                 Calc.Percent();
                 MainText.Text += "%";
-            }
+            }*/
         }
         private void EraseAll_Click(object sender, RoutedEventArgs e)
         {
             Calc.Remove_CE();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void Erase_Click(object sender, RoutedEventArgs e)
         {
             Calc.Remove_C();
             HistoryBox.Text = "";
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             Calc.RemoveDigit();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.CurrNumber);
         }
         //Обработка нажатий клавиатуры
         private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
+        {/*
             if (e.Key == Key.NumPad0 || e.Key == Key.D0)
             {
                 Calc.AddDigit("0");
@@ -238,7 +226,7 @@ namespace Windows7_Calc
             {
                 if (Calc.CanEqual)
                 {
-                    HistoryBox.Text += Calc.ActiveVariable + ((Calc.IsPercent) ? "%" : "");
+                    HistoryBox.Text += Calc.Accumulator + ((Calc.IsPercent) ? "%" : "");
                     Calc.Equals();
                 }
             }
@@ -246,7 +234,7 @@ namespace Windows7_Calc
             {
                 if (Calc.IsNotBusy())
                 {
-                    HistoryBox.Text = Calc.ActiveVariable + " + ";
+                    HistoryBox.Text = Calc.Accumulator + " + ";
                     Calc.Addition();
                 }
             }
@@ -254,7 +242,7 @@ namespace Windows7_Calc
             {
                 if (Calc.IsNotBusy())
                 {
-                    HistoryBox.Text = Calc.ActiveVariable + " - ";
+                    HistoryBox.Text = Calc.Accumulator + " - ";
                     Calc.Subtraction();
                 }
             }
@@ -262,7 +250,7 @@ namespace Windows7_Calc
             {
                 if (Calc.IsNotBusy())
                 {
-                    HistoryBox.Text = Calc.ActiveVariable + " × ";
+                    HistoryBox.Text = Calc.Accumulator + " × ";
                     Calc.Multiplication();
                 }
             }
@@ -270,7 +258,7 @@ namespace Windows7_Calc
             {
                 if (Calc.IsNotBusy())
                 {
-                    HistoryBox.Text = Calc.ActiveVariable + " ÷ ";
+                    HistoryBox.Text = Calc.Accumulator + " ÷ ";
                     Calc.Division();
                 }
             }
@@ -280,45 +268,73 @@ namespace Windows7_Calc
                 Calc.RemoveDigit();
             }
 
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.Accumulator);*/
         }
 
         private void MemoryClearButton_Click(object sender, RoutedEventArgs e)
-        {
+        {/*
             Calc.MemoryClear();
-            MemorySaveButton.Background = new SolidColorBrush(Color.FromRgb(167, 222, 255));
+            MemorySaveButton.Background = new SolidColorBrush(Color.FromRgb(167, 222, 255));*/
         }
 
         private void MemorySaveButton_Click(object sender, RoutedEventArgs e)
-        {
+        {/*
             Calc.MemoryWrite();
-            (sender as Button).Background = new SolidColorBrush(Color.FromRgb(93, 194, 255));
+            (sender as Button).Background = new SolidColorBrush(Color.FromRgb(93, 194, 255));*/
         }
 
         private void MemoryReadButton_Click(object sender, RoutedEventArgs e)
-        {
+        {/*
             Calc.MemoryRead();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.Accumulator);*/
         }
 
         private void MemoryPlusButton_Click(object sender, RoutedEventArgs e)
         {
-            Calc.MemoryPlus();
+           // Calc.MemoryPlus();
         }
             
         private void MemoryMinusButton_Click(object sender, RoutedEventArgs e)
         {
-            Calc.MemoryMinus();
+            //Calc.MemoryMinus();
         }
 
         private void HistoryBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
-        {
+        {/*
             if ((sender as ComboBox).SelectedValue != null)
             {
                 Calc.SetNumber((sender as ComboBox).SelectedValue.ToString());
             }
             //MainText.Text = (sender as ComboBox).SelectedValue.ToString();
-            NumUpdate(Calc.ActiveVariable);
+            NumUpdate(Calc.Accumulator);*/
+        }
+
+        private void MenuItem_Checked(object sender, RoutedEventArgs e)
+        {
+            HistoryBox.Visibility = Visibility.Visible;
+        }
+
+        private void MenuItem_Unchecked(object sender, RoutedEventArgs e)
+        {
+            HistoryBox.Visibility = Visibility.Hidden;
+        }
+
+        private void EngineerModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            double WindowWidth = MainWindow1.Width;
+            for (double i = WindowWidth; i < WindowWidth * 2; i += 2)
+            {
+                MainWindow1.Width = i;
+            }
+        }
+
+        private void CommonModeBtn_Click(object sender, RoutedEventArgs e)
+        {
+            double WindowWidth = MainWindow1.Width;
+            for (double i = WindowWidth; i > WindowWidth / 2; i -= 2)
+            {
+                MainWindow1.Width = i;
+            }
         }
     }
 }
