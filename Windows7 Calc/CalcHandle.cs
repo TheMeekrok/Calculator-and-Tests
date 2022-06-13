@@ -21,7 +21,8 @@ namespace Windows7_Calc
         private enum State
         {
             N, Exponent, Answer, Error,
-                Add, Subs, Mult, Div
+                Add, Subs, Mult, Div,
+                Sqr
         }
         private State CurrentState = State.N;
 
@@ -42,7 +43,7 @@ namespace Windows7_Calc
                 || CurrentState == State.Error)
             {
                 Accumulator = 0.0;
-                CurrNumber = 0.0;
+                CurrNumber = Buffer = 0.0;
                 CurrentState = State.N;
 
                 CurrentError = "";
@@ -67,14 +68,12 @@ namespace Windows7_Calc
                 _CurrNumber += Digit;
             }
 
-            CurrNumber = Convert.ToDouble(_CurrNumber);
+            CurrNumber = Buffer = Convert.ToDouble(_CurrNumber);
         }
-        
         public void SetNumber(string Num)
         {
-            CurrNumber = Convert.ToDouble(Num);
+            CurrNumber = Buffer = Convert.ToDouble(Num);
         }
-
         public void RemoveDigit()
         {
             IsAddComma = false;
@@ -90,28 +89,44 @@ namespace Windows7_Calc
             else if (_CurrNumber.Length == 1)
                 _CurrNumber = "0";
 
-            CurrNumber = Convert.ToDouble(_CurrNumber);
+            CurrNumber = Buffer = Convert.ToDouble(_CurrNumber);
         }
         public void Remove_CE()
         {
             IsAddComma = false;
-            CurrNumber = 0.0;
+            CurrNumber = Buffer = 0.0;
         }
         public void Remove_C()
         {
             IsAddComma = false;
 
-            CurrNumber = 0.0;
-            Accumulator = 0.0;
+            CurrNumber = Buffer = Accumulator = 0.0;
 
             CurrentState = State.N;
-            CurrentError = "";
+            CurrentExpression = CurrentError = "";
         }
+
+        public string CurrentExpression { get; private set; } = "";
+        private Dictionary<string, string> Operations = new Dictionary<string, string>()
+        {
+            { "Plus", "+" },
+            { "Minus", "-" },
+            { "Multiplication", "×"},
+            { "Division", "÷"},
+            { "SquareRoot", "√"},
+            { "Percent", "%"}
+        };
+        private Dictionary<string, string> Errors = new Dictionary<string, string>()
+        {
+            { "DivisionByZero", "Деление на 0 невозможно" },
+            { "IncorrentInput", "Неверный ввод" }
+        };
 
         public void Addition()
         {
-            if (CurrentState == State.N
-                || CurrentState == State.Answer)
+            IsAddComma = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
 
             else
@@ -119,15 +134,17 @@ namespace Windows7_Calc
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            CurrentState = State.Add;
-            CurrNumber = 0.0;
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Plus"] + " ";
 
-            _Sqrt = false;
+            CurrentState = State.Add;
+            CurrNumber = Buffer = 0.0;
         }
         public void Subtraction()
         {
-            if (CurrentState == State.N 
-                || CurrentState == State.Answer)
+            IsAddComma = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
 
             else
@@ -135,15 +152,17 @@ namespace Windows7_Calc
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            CurrentState = State.Subs;
-            CurrNumber = 0.0;
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Minus"] + " ";
 
-            _Sqrt = false;
+            CurrentState = State.Subs;
+            CurrNumber = Buffer = 0.0;
         }
         public void Multiplication()
         {
-            if (CurrentState == State.N
-                || CurrentState == State.Answer)
+            IsAddComma = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
 
             else
@@ -151,23 +170,25 @@ namespace Windows7_Calc
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            CurrentState = State.Mult;
-            CurrNumber = 0.0;
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Multiplication"] + " ";
 
-            _Sqrt = false;
+            CurrentState = State.Mult;
+            CurrNumber = Buffer = 0.0;
         }
         public void Division()
         {
-            if (CurrentState == State.N
-                || CurrentState == State.Answer)
+            IsAddComma = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
 
             else
             {
-                if (CurrNumber == 0.0)
+                if (CurrNumber == 0)
                 {
                     CurrentState = State.Error;
-                    CurrentError = "Деление на 0 невозможно";
+                    CurrentError = Errors["DivisionByZero"];
                     return;
                 }
                 Accumulator /= CurrNumber;
@@ -175,10 +196,11 @@ namespace Windows7_Calc
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            CurrentState = State.Div;
-            CurrNumber = 0.0;
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Division"] + " ";
 
-            _Sqrt = false;
+            CurrentState = State.Div;
+            CurrNumber = Buffer = 0.0;
         }
 
         //История операций
@@ -192,61 +214,64 @@ namespace Windows7_Calc
                 case State.Add:
                     Accumulator += CurrNumber;
                     break;
+
                 case State.Subs:
                     Accumulator -= CurrNumber;
                     break;
+
                 case State.Mult:
                     Accumulator *= CurrNumber;
                     break;
+
                 case State.Div:
                     if (CurrNumber == 0.0)
                     {
                         CurrentState = State.Error;
-                        CurrentError = "Деление на 0 невозможно";
+                        CurrentError = Errors["DivisionByZero"];
                         return;
                     }
+
                     Accumulator /= CurrNumber;
+                    break;
+
+                case State.Sqr:
+                    Accumulator = CurrNumber;
                     break;
             }
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            if (_Sqrt && CurrentState == State.N)
-            {
-                CalcHistory.Add(CurrNumber.ToString());
-                CurrentState = State.Answer;
-                _Sqrt = false;
-                return;
-            }
-
             CurrentState = State.Answer;
-            _Sqrt = false;
+            CurrentExpression = "";
 
             CalcHistory.Add(Accumulator.ToString());
-            CurrNumber = Accumulator;
+            CurrNumber = Buffer = Accumulator;
+
+            IsSqrt = false;
         }
 
         public void SignSwitch()
         {
             CurrNumber = CurrNumber * -1;
         }
-        public bool _Sqrt { get; private set; } = false;
-        public double Buffer { get; private set; } = 0.0;
+
+        private double Buffer = 0.0;
+        private bool IsSqrt = false;
         public void Sqrt()
         {
             if (CurrNumber < 0)
             {
                 CurrNumber = 0.0;
                 CurrentState = State.Error;
-                CurrentError = "Недопустимый ввод";
+                CurrentError = Errors["IncorrentInput"];
+                return;
             }
-            else
-            {
-                if (!_Sqrt)
-                    Buffer = CurrNumber;
-                CurrNumber = Math.Round(Math.Sqrt(CurrNumber), MAX_DIGITS_AFTER_COMMA);
-                _Sqrt = true;
-            }
+
+            if (CurrentState == State.N)
+                CurrentState = State.Sqr;
+
+            CurrentExpression += Operations["SquareRoot"];
+            CurrNumber = Math.Round(Math.Sqrt(CurrNumber), MAX_DIGITS_AFTER_COMMA);
         }
         /*
         public void Reverse()

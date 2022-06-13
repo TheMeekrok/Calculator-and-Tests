@@ -36,6 +36,7 @@ namespace Windows7_Calc
 
             MainText.FontSize = Math.Min(MainTextWidth * 1.85 / Text.Length, MainTextFontSize);
             MainText.Text = Text;
+            HistoryBox.Text = Calc.CurrentExpression;
         }
         public CalcHandle Calc = new CalcHandle();
        
@@ -97,38 +98,27 @@ namespace Windows7_Calc
         }
         private void Equals_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += Calc.CurrNumber.ToString();
-            HistoryBox.Text = "";
             Calc.Equals();
             NumUpdate(Calc.Accumulator);
-
             HistoryBox.ItemsSource = Calc.CalcHistory;
         }
         private void Plus_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString()) 
-                + " " + (sender as Button).Content.ToString() + " ";
             Calc.Addition();
             NumUpdate(Calc.Accumulator);
         }
         private void Minus_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
-                + " " + (sender as Button).Content.ToString() + " ";
             Calc.Subtraction();
             NumUpdate(Calc.Accumulator);
         }
         private void Multiply_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
-                + " " + (sender as Button).Content.ToString() + " ";
             Calc.Multiplication();
             NumUpdate(Calc.Accumulator);
         }
         private void Divide_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += ((Calc._Sqrt) ? Calc.Buffer.ToString() : Calc.CurrNumber.ToString())
-                + " " + (sender as Button).Content.ToString() + " ";
             Calc.Division();
             NumUpdate(Calc.Accumulator);
         }
@@ -139,7 +129,6 @@ namespace Windows7_Calc
         }
         private void Sqrt_Click(object sender, RoutedEventArgs e)
         {
-            HistoryBox.Text += (sender as Button).Content.ToString();
             Calc.Sqrt();
             NumUpdate(Calc.CurrNumber);
         }
