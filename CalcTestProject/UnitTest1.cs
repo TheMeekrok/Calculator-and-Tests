@@ -19,7 +19,7 @@ namespace CalcTestProject
             Calc.AddDigit("5");
             Calc.AddDigit("7");
 
-            Assert.AreEqual("64023457", Calc.ActiveVariable);
+            Assert.AreEqual(64023457, Calc.CurrNumber);
         }
         [TestMethod]
         public void TestMethod2()
@@ -39,7 +39,7 @@ namespace CalcTestProject
             Calc.AddDigit("7");
             Calc.RemoveDigit();
 
-            Assert.AreEqual("640,345", Calc.ActiveVariable);
+            Assert.AreEqual(640.345, Calc.CurrNumber);
         }
         [TestMethod]
         public void AdditionTest1()
@@ -61,7 +61,7 @@ namespace CalcTestProject
             Calc.AddDigit("7");
 
             Calc.Equals();
-            Assert.AreEqual("6405,757", Calc.ActiveVariable);
+            Assert.AreEqual(6405.757, Calc.Accumulator);
         }
         [TestMethod]
         public void SubtractionTest1()
@@ -86,7 +86,7 @@ namespace CalcTestProject
             Calc.AddDigit("7");
 
             Calc.Equals();
-            Assert.AreEqual("-2931,157", Calc.ActiveVariable);
+            Assert.AreEqual(-2931.157, Calc.Accumulator);
         }
         [TestMethod]
         public void MultiplicationTest1()
@@ -111,7 +111,7 @@ namespace CalcTestProject
             Calc.AddDigit("7");
 
             Calc.Equals();
-            Assert.AreEqual("59755591,7511", Calc.ActiveVariable);
+            Assert.AreEqual(59755591.7511, Calc.Accumulator);
         }
         [TestMethod]
         public void MultiplicationTest2()
@@ -152,7 +152,7 @@ namespace CalcTestProject
             Calc.AddDigit("9");
 
             Calc.Equals();
-            Assert.AreEqual("9,99999999999998E+29", Calc.ActiveVariable);
+            Assert.AreEqual(9.99999999999998E+29, Calc.Accumulator);
         }
         [TestMethod]
         public void RemovalTest1()
@@ -168,7 +168,7 @@ namespace CalcTestProject
             Calc.AddDigit("6");
             Calc.AddDigit("4");
 
-            Assert.AreEqual("64", Calc.ActiveVariable);
+            Assert.AreEqual(64, Calc.CurrNumber);
         }
         [TestMethod]
         public void SqrtTest1()
@@ -186,7 +186,7 @@ namespace CalcTestProject
             Calc.AddDigit("0");
             Calc.Sqrt();
 
-            Assert.AreEqual("25,298221281", Calc.ActiveVariable);
+            Assert.AreEqual(25.298221281, Calc.CurrNumber);
         }
         [TestMethod]
         public void ReverseTest1()
@@ -197,7 +197,7 @@ namespace CalcTestProject
             Calc.Reverse();
             Calc.Reverse();
 
-            Assert.AreEqual("0", Calc.ActiveVariable);
+            Assert.AreEqual(0, Calc.CurrNumber);
         }
         [TestMethod]
         public void SignSwitchTest()
@@ -214,7 +214,7 @@ namespace CalcTestProject
 
             Calc.SignSwitch();
 
-            Assert.AreEqual("-9,457", Calc.ActiveVariable);
+            Assert.AreEqual(9.457, Calc.CurrNumber);
         }
         [TestMethod]
         public void SqrtTest2()
@@ -230,7 +230,7 @@ namespace CalcTestProject
 
             Calc.Sqrt();
 
-            Assert.AreEqual("0", Calc.ActiveVariable);
+            Assert.AreEqual(0, Calc.CurrNumber);
         }
         [TestMethod]
         public void RemovalTest2()
@@ -246,7 +246,7 @@ namespace CalcTestProject
 
             Calc.Remove_C();
 
-            Assert.AreEqual("0", Calc.ActiveVariable);
+            Assert.AreEqual(0, Calc.CurrNumber);
         }
         [TestMethod]
         public void MemoryCellTest1()
@@ -272,7 +272,7 @@ namespace CalcTestProject
             Calc.MemoryMinus();
             Calc.MemoryRead();
 
-            Assert.AreEqual("-19,457", Calc.ActiveVariable);
+            Assert.AreEqual(-19.457, Calc.CurrNumber);
         }
         [TestMethod]
         public void MemoryCellTest2()
@@ -295,7 +295,7 @@ namespace CalcTestProject
             Calc.MemoryMinus();
             Calc.MemoryRead();
 
-            Assert.AreEqual("0", Calc.ActiveVariable);
+            Assert.AreEqual(0, Calc.CurrNumber);
         }
         [TestMethod]
         public void PercentTest1()
@@ -320,7 +320,7 @@ namespace CalcTestProject
             Calc.Percent();
             Calc.Equals();
 
-            Assert.AreEqual("-10,35134849", Calc.ActiveVariable);
+            Assert.AreEqual(-10.35134849, Calc.Accumulator);
         }
         [TestMethod]
         public void PercentTest2()
@@ -349,7 +349,7 @@ namespace CalcTestProject
             Calc.Percent();
             Calc.Equals();
 
-            Assert.AreEqual("9,054299991", Calc.ActiveVariable);
+            Assert.AreEqual(9.054299991, Calc.Accumulator);
         }
         [TestMethod]
         public void PercentTest3()
@@ -386,7 +386,7 @@ namespace CalcTestProject
             Calc.Percent();
             Calc.Equals();
 
-            Assert.AreEqual("1,006063829", Calc.ActiveVariable);
+            Assert.AreEqual(1.063829787, Calc.Accumulator);
         }
     }
 }

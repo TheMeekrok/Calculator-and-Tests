@@ -1,146 +1,227 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Collections.ObjectModel;
 
 namespace Windows7_Calc
 {
     public class CalcHandle
     {
-        private const int MAX_DIGITS = 18;
+        private const int MAX_DIGITS = 15;
         private const int MAX_DIGITS_AFTER_COMMA = 9;
+        private const int MAX_VISIBLE_LENGTH = 45;
 
-        public string ActiveVariable { get; private set; } = "0";
-        public string PassiveVariable { get; private set; } = "0";
-        public string Answer { get; private set; } = "0";
+        public double Accumulator { get; private set; } = 0.0;
+
+        public double CurrNumber { get; private set; } = 0.0;
+        private double Buffer = 0.0;
 
         //Состояния калькулятора
         private enum State
         {
-            N, Addition, Subtraction, Multiplication, Division, Error
+            N, Exponent, Answer, Error,
+                Add, Subs, Mult, Div,
+                Sqr, Rev
         }
         private State CurrentState = State.N;
-        public bool IsNotBusy()
-        {
-            return CurrentState == State.N;
-        }
+
+        public string CurrentError = "";
         public bool IsError()
         {
             return CurrentState == State.Error;
         }
 
-        public bool CanEqual { get; private set; } = false;
-        public bool IsPercent { get; private set; } = false;
-
-        //Методы обработки чисел
-        public void AddDigit(string Num)
+        bool IsAddComma = false;
+        public void AddComma()
         {
-            if (CurrentState == State.Error)
+            IsAddComma = true;
+        }
+        public void AddDigit(string Digit)
+        {
+            if (CurrentState == State.Answer
+                || CurrentState == State.Error)
             {
+                Accumulator = 0.0;
+                CurrNumber = Buffer = 0.0;
                 CurrentState = State.N;
+
+                CurrentError = "";
             }
-            if (ActiveVariable.Length <= MAX_DIGITS)
+
+            string _CurrNumber = CurrNumber.ToString();
+
+            if (_CurrNumber.Length >= MAX_DIGITS
+                || _CurrNumber.Contains("E"))
+                return;
+
+            if (_CurrNumber == "0" && !IsAddComma)
+                _CurrNumber = Digit;
+
+            else
             {
-                if (ActiveVariable.Length > 0 && ActiveVariable[0] == '0' 
-                    && !ActiveVariable.Contains(","))
+                if (!_CurrNumber.Contains(",") && IsAddComma == true)
                 {
-                    ActiveVariable = Num;
+                    _CurrNumber += ",";
+                    IsAddComma = false;
                 }
-                else
-                {
-                    ActiveVariable += Num;
-                }
+                _CurrNumber += Digit;
             }
+
+            CurrNumber = Buffer = Convert.ToDouble(_CurrNumber);
         }
         public void SetNumber(string Num)
         {
-            if (CurrentState == State.Error)
-            {
-                CurrentState = State.N;
-            }
-            ActiveVariable = Num;
-        }
+            double Temp;
+            Double.TryParse(Num, out Temp);
 
-        public void AddComma()
-        {
-            if (ActiveVariable.Length <= MAX_DIGITS && !ActiveVariable.Contains(","))
-            {
-                ActiveVariable += ",";
-            }
-        }
+            if (Temp == 0.0)
+                return;
 
+            CurrNumber = Buffer = Temp;
+        }
         public void RemoveDigit()
         {
-            if (CurrentState == State.Error)
-            {
-                CurrentState = State.N;
-            }
-            if (ActiveVariable.Length > 1)
-            {
-                ActiveVariable = ActiveVariable.Remove(ActiveVariable.Length - 1, 1);
-            }
-            else if (ActiveVariable.Length == 1)
-            {
-                ActiveVariable = "0";
-            }
+            IsAddComma = false;
+
+            if (CurrentState == State.Answer)
+                return;
+
+            string _CurrNumber = CurrNumber.ToString();
+
+            if (_CurrNumber.Length >= 2)
+                _CurrNumber = _CurrNumber.Remove(_CurrNumber.Length - 1, 1);
+
+            else if (_CurrNumber.Length == 1)
+                _CurrNumber = "0";
+
+            CurrNumber = Buffer = Convert.ToDouble(_CurrNumber);
         }
         public void Remove_CE()
         {
-            if (CurrentState == State.Error)
-            {
-                CurrentState = State.N;
-            }
-            ActiveVariable = "0";
-            CurrentState = State.N;
+            IsAddComma = false;
+            CurrNumber = Buffer = 0.0;
         }
         public void Remove_C()
         {
+            IsAddComma = false;
+
+            CurrNumber = Buffer = Accumulator = 0.0;
+
             CurrentState = State.N;
-            ActiveVariable = "0";
+            CurrentExpression = CurrentError = "";
         }
+
+        //Операции
+        private string _CurrentExpression = "";
+        public string CurrentExpression
+        {
+            get
+            {
+                return _CurrentExpression;
+            }
+            private set
+            {
+                _CurrentExpression = value;
+                if (_CurrentExpression.Length >= MAX_VISIBLE_LENGTH)
+                {
+                    _CurrentExpression = _CurrentExpression.Remove(
+                        0, _CurrentExpression.Length - MAX_VISIBLE_LENGTH);
+                }
+            }
+        }
+        private Dictionary<string, string> Operations = new Dictionary<string, string>()
+        {
+            { "Plus", "+" },
+            { "Minus", "-" },
+            { "Multiplication", "×"},
+            { "Division", "÷"},
+            { "SquareRoot", "√"},
+        };
+        private Dictionary<string, string> Errors = new Dictionary<string, string>()
+        {
+            { "DivisionByZero", "Деление на 0 невозможно" },
+            { "IncorrentInput", "Неверный ввод" }
+        };
 
         public void Addition()
         {
-            if (CurrentState == State.N)
-            {
-                PassiveVariable = ActiveVariable;
-                ActiveVariable = "0";
-                CurrentState = State.Addition;
-                CanEqual = true;
-            }
+            IsAddComma = IsReversed = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
+                Accumulator = CurrNumber;
+
+            else
+                Accumulator += CurrNumber;
+
+            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Plus"] + " ";
+
+            CurrentState = State.Add;
+            CurrNumber = Buffer = 0.0;
         }
         public void Subtraction()
         {
-            if (CurrentState == State.N)
-            {
-                PassiveVariable = ActiveVariable;
-                ActiveVariable = "0";
-                CurrentState = State.Subtraction;
-                CanEqual = true;
-            }
+            IsAddComma = IsReversed = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
+                Accumulator = CurrNumber;
+
+            else
+                Accumulator -= CurrNumber;
+
+            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Minus"] + " ";
+
+            CurrentState = State.Subs;
+            CurrNumber = Buffer = 0.0;
         }
         public void Multiplication()
         {
-            if (CurrentState == State.N)
-            {
-                PassiveVariable = ActiveVariable;
-                ActiveVariable = "0";
-                CurrentState = State.Multiplication;
-                CanEqual = true;
-            }
+            IsAddComma = IsReversed = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
+                Accumulator = CurrNumber;
+
+            else
+                Accumulator *= CurrNumber;
+
+            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Multiplication"] + " ";
+
+            CurrentState = State.Mult;
+            CurrNumber = Buffer = 0.0;
         }
         public void Division()
         {
-            if (CurrentState == State.N)
+            IsAddComma = IsReversed = false;
+
+            if (CurrentState == State.N || CurrentState == State.Answer)
+                Accumulator = CurrNumber;
+
+            else
             {
-                PassiveVariable = ActiveVariable;
-                ActiveVariable = "0";
-                CurrentState = State.Division;
-                CanEqual = true;
+                if (CurrNumber == 0)
+                {
+                    CurrentState = State.Error;
+                    CurrentExpression = "";
+                    CurrentError = Errors["DivisionByZero"];
+                    return;
+                }
+                Accumulator /= CurrNumber;
             }
+
+            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+
+            CurrentExpression += Buffer.ToString() + " "
+                + Operations["Division"] + " ";
+
+            CurrentState = State.Div;
+            CurrNumber = Buffer = 0.0;
         }
 
         //История операций
@@ -149,125 +230,138 @@ namespace Windows7_Calc
 
         public void Equals()
         {
-            if (CanEqual)
+            switch (CurrentState)
             {
-                double X = Convert.ToDouble(ActiveVariable);
-                double Y = Convert.ToDouble(PassiveVariable);
+                case State.Add:
+                    Accumulator += CurrNumber;
+                    break;
 
-                if (CurrentState == State.Addition)
-                {
-                    if (IsPercent)
-                        X = Y / 100 * X;
-                    Answer = Convert.ToString(Math.Round(Y + X, MAX_DIGITS_AFTER_COMMA));
-                }
+                case State.Subs:
+                    Accumulator -= CurrNumber;
+                    break;
 
-                if (CurrentState == State.Subtraction)
-                {
-                    if (IsPercent)
-                        X = Y / 100 * X;
-                    Answer = Convert.ToString(Math.Round(Y - X, MAX_DIGITS_AFTER_COMMA));
-                }
+                case State.Mult:
+                    Accumulator *= CurrNumber;
+                    break;
 
-                if (CurrentState == State.Multiplication)
-                {
-                    if (IsPercent)
-                        X = X / 100;
-                    Answer = Convert.ToString(Math.Round(Y * X, MAX_DIGITS_AFTER_COMMA));
-                }
+                case State.Div:
+                    if (CurrNumber == 0.0)
+                    {
+                        CurrentState = State.Error;
+                        CurrentExpression = "";
+                        CurrentError = Errors["DivisionByZero"];
+                        return;
+                    }
 
-                if (CurrentState == State.Division)
-                {
-                    if (IsPercent)
-                        X = X / 100;
-                    Answer = Convert.ToString(Math.Round(Y / X, MAX_DIGITS_AFTER_COMMA));
-                }
+                    Accumulator /= CurrNumber;
+                    break;
 
-                CurrentState = State.N;
-                CanEqual = false; IsPercent = false;
+                case State.Sqr:
+                    Accumulator = CurrNumber;
+                    break;
 
-                ActiveVariable = Answer;
-                PassiveVariable = "0";
-
-                CalcHistory.Add(ActiveVariable);
+                case State.Rev:
+                    Accumulator = CurrNumber;
+                    break;
             }
+
+            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+
+            CurrentState = State.Answer;
+            CurrentExpression = "";
+
+            CalcHistory.Add(Accumulator.ToString());
+            CurrNumber = Buffer = Accumulator;
         }
 
         public void SignSwitch()
         {
-            double Number = Convert.ToDouble(ActiveVariable);
-            if (Number > 0)
-            {
-                ActiveVariable = ActiveVariable.Insert(0, "-");
-            }
-            if (Number < 0)
-            {
-                ActiveVariable = ActiveVariable.Remove(0, 1);
-            }
+            CurrNumber = CurrNumber * -1;
         }
+
         public void Sqrt()
         {
-            double X = Convert.ToDouble(ActiveVariable);
-            if (X < 0)
+            if (CurrNumber < 0)
             {
-                ActiveVariable = "0";
+                CurrNumber = 0.0;
                 CurrentState = State.Error;
+                CurrentError = Errors["IncorrentInput"];
+                return;
             }
-            else
-            {
-                ActiveVariable = Convert.ToString(Math.Round(Math.Sqrt(X), MAX_DIGITS_AFTER_COMMA));
-                CalcHistory.Add(ActiveVariable);
-            }    
+
+            if (CurrentState == State.N)
+                CurrentState = State.Sqr;
+
+            CurrentExpression += Operations["SquareRoot"];
+            CurrNumber = Math.Round(Math.Sqrt(CurrNumber), MAX_DIGITS_AFTER_COMMA);
         }
+
+        private bool IsReversed = false;
         public void Reverse()
         {
-            double X = Convert.ToDouble(ActiveVariable);
-            ActiveVariable = Convert.ToString(Math.Round(1 / X, MAX_DIGITS_AFTER_COMMA));
-            CalcHistory.Add(ActiveVariable);
+            if (CurrNumber == 0.0)
+            {
+                CurrentState = State.Error;
+                CurrentError = Errors["DivisionByZero"];
+                return;
+            }
+
+            if (CurrentState == State.N)
+                CurrentState = State.Rev;
+
+            if (IsReversed)
+            {
+                CurrentExpression = CurrentExpression.Remove(
+                    CurrentExpression.Length - 2, 2);
+
+                CurrNumber = Buffer;
+                IsReversed = false;
+            }
+
+            else
+            {
+                CurrentExpression += "1/";
+
+                CurrNumber = Math.Round(1 / CurrNumber, MAX_DIGITS_AFTER_COMMA);
+                IsReversed = true;
+            }
         }
         public void Percent()
         {
-            IsPercent = true;
+            if (CurrentState != State.N || CurrentState != State.Error)
+                CurrNumber = Buffer = Math.Round(
+                    Accumulator * CurrNumber / 100, MAX_DIGITS_AFTER_COMMA);
         }
 
         //Число в памяти
-        private string MemoryCell = "0";
+        private double MemoryCell = 0.0;
+        public bool MemoryIsFull = false;
         public void MemoryRead()
         {
-            if (CurrentMemoryState != MemoryState.IsEmpty)
-            {
-                ActiveVariable = MemoryCell;
-            }
+            CurrentState = State.Answer;
+            if (MemoryIsFull)
+                CurrNumber = MemoryCell;
         }
         public void MemoryWrite()
         {
-            MemoryCell = ActiveVariable;
-            CurrentMemoryState = MemoryState.IsFull;
+            MemoryCell = (CurrentState == State.Answer) 
+                ? Accumulator : CurrNumber;
+            MemoryIsFull = true;
         }
         public void MemoryClear()
         {
-            MemoryCell = "0";
-            CurrentMemoryState = MemoryState.IsEmpty;
+            MemoryCell = 0.0;
+            MemoryIsFull = false;
         }
-        private enum MemoryState
-        {
-            IsEmpty, IsFull
-        }
-        private MemoryState CurrentMemoryState = MemoryState.IsEmpty;
         public void MemoryPlus()
         {
-            if (CurrentMemoryState == MemoryState.IsFull)
-            {
-                MemoryCell = Convert.ToString(
-                    Convert.ToDouble(MemoryCell) + Convert.ToDouble(ActiveVariable));
-            }
+            if (MemoryIsFull)
+                MemoryCell += CurrNumber;
         }
         public void MemoryMinus()
         {
-            if (CurrentMemoryState == MemoryState.IsFull)
-            {
-                MemoryCell = Convert.ToString(
-                    Convert.ToDouble(MemoryCell) - Convert.ToDouble(ActiveVariable));
-            }
+            if (MemoryIsFull)
+                MemoryCell -= CurrNumber;
         }
     }
 }
