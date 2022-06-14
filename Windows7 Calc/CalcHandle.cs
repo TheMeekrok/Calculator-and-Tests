@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Collections.ObjectModel;
 
 namespace Windows7_Calc
@@ -12,17 +8,19 @@ namespace Windows7_Calc
     {
         private const int MAX_DIGITS = 15;
         private const int MAX_DIGITS_AFTER_COMMA = 9;
+        private const int MAX_VISIBLE_LENGTH = 45;
 
         public double Accumulator { get; private set; } = 0.0;
+
         public double CurrNumber { get; private set; } = 0.0;
-        public double Answer { get; private set; } = 0.0;
+        private double Buffer = 0.0;
 
         //Состояния калькулятора
         private enum State
         {
             N, Exponent, Answer, Error,
                 Add, Subs, Mult, Div,
-                Sqr
+                Sqr, Rev
         }
         private State CurrentState = State.N;
 
@@ -72,7 +70,13 @@ namespace Windows7_Calc
         }
         public void SetNumber(string Num)
         {
-            CurrNumber = Buffer = Convert.ToDouble(Num);
+            double Temp;
+            Double.TryParse(Num, out Temp);
+
+            if (Temp == 0.0)
+                return;
+
+            CurrNumber = Buffer = Temp;
         }
         public void RemoveDigit()
         {
@@ -83,7 +87,7 @@ namespace Windows7_Calc
 
             string _CurrNumber = CurrNumber.ToString();
 
-            if (_CurrNumber.Length > 2)
+            if (_CurrNumber.Length >= 2)
                 _CurrNumber = _CurrNumber.Remove(_CurrNumber.Length - 1, 1);
 
             else if (_CurrNumber.Length == 1)
@@ -106,7 +110,24 @@ namespace Windows7_Calc
             CurrentExpression = CurrentError = "";
         }
 
-        public string CurrentExpression { get; private set; } = "";
+        //Операции
+        private string _CurrentExpression = "";
+        public string CurrentExpression
+        {
+            get
+            {
+                return _CurrentExpression;
+            }
+            private set
+            {
+                _CurrentExpression = value;
+                if (_CurrentExpression.Length >= MAX_VISIBLE_LENGTH)
+                {
+                    _CurrentExpression = _CurrentExpression.Remove(
+                        0, _CurrentExpression.Length - MAX_VISIBLE_LENGTH);
+                }
+            }
+        }
         private Dictionary<string, string> Operations = new Dictionary<string, string>()
         {
             { "Plus", "+" },
@@ -114,7 +135,6 @@ namespace Windows7_Calc
             { "Multiplication", "×"},
             { "Division", "÷"},
             { "SquareRoot", "√"},
-            { "Percent", "%"}
         };
         private Dictionary<string, string> Errors = new Dictionary<string, string>()
         {
@@ -124,7 +144,7 @@ namespace Windows7_Calc
 
         public void Addition()
         {
-            IsAddComma = false;
+            IsAddComma = IsReversed = false;
 
             if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
@@ -142,7 +162,7 @@ namespace Windows7_Calc
         }
         public void Subtraction()
         {
-            IsAddComma = false;
+            IsAddComma = IsReversed = false;
 
             if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
@@ -160,7 +180,7 @@ namespace Windows7_Calc
         }
         public void Multiplication()
         {
-            IsAddComma = false;
+            IsAddComma = IsReversed = false;
 
             if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
@@ -178,7 +198,7 @@ namespace Windows7_Calc
         }
         public void Division()
         {
-            IsAddComma = false;
+            IsAddComma = IsReversed = false;
 
             if (CurrentState == State.N || CurrentState == State.Answer)
                 Accumulator = CurrNumber;
@@ -188,6 +208,7 @@ namespace Windows7_Calc
                 if (CurrNumber == 0)
                 {
                     CurrentState = State.Error;
+                    CurrentExpression = "";
                     CurrentError = Errors["DivisionByZero"];
                     return;
                 }
@@ -227,6 +248,7 @@ namespace Windows7_Calc
                     if (CurrNumber == 0.0)
                     {
                         CurrentState = State.Error;
+                        CurrentExpression = "";
                         CurrentError = Errors["DivisionByZero"];
                         return;
                     }
@@ -235,6 +257,10 @@ namespace Windows7_Calc
                     break;
 
                 case State.Sqr:
+                    Accumulator = CurrNumber;
+                    break;
+
+                case State.Rev:
                     Accumulator = CurrNumber;
                     break;
             }
@@ -246,8 +272,6 @@ namespace Windows7_Calc
 
             CalcHistory.Add(Accumulator.ToString());
             CurrNumber = Buffer = Accumulator;
-
-            IsSqrt = false;
         }
 
         public void SignSwitch()
@@ -255,8 +279,6 @@ namespace Windows7_Calc
             CurrNumber = CurrNumber * -1;
         }
 
-        private double Buffer = 0.0;
-        private bool IsSqrt = false;
         public void Sqrt()
         {
             if (CurrNumber < 0)
@@ -273,58 +295,73 @@ namespace Windows7_Calc
             CurrentExpression += Operations["SquareRoot"];
             CurrNumber = Math.Round(Math.Sqrt(CurrNumber), MAX_DIGITS_AFTER_COMMA);
         }
-        /*
+
+        private bool IsReversed = false;
         public void Reverse()
         {
-            double X = Convert.ToDouble(Accumulator);
-            Accumulator = Convert.ToString(Math.Round(1 / X, MAX_DIGITS_AFTER_COMMA));
-            CalcHistory.Add(Accumulator);
+            if (CurrNumber == 0.0)
+            {
+                CurrentState = State.Error;
+                CurrentError = Errors["DivisionByZero"];
+                return;
+            }
+
+            if (CurrentState == State.N)
+                CurrentState = State.Rev;
+
+            if (IsReversed)
+            {
+                CurrentExpression = CurrentExpression.Remove(
+                    CurrentExpression.Length - 2, 2);
+
+                CurrNumber = Buffer;
+                IsReversed = false;
+            }
+
+            else
+            {
+                CurrentExpression += "1/";
+
+                CurrNumber = Math.Round(1 / CurrNumber, MAX_DIGITS_AFTER_COMMA);
+                IsReversed = true;
+            }
         }
         public void Percent()
         {
-            IsPercent = true;
+            if (CurrentState != State.N || CurrentState != State.Error)
+                CurrNumber = Buffer = Math.Round(
+                    Accumulator * CurrNumber / 100, MAX_DIGITS_AFTER_COMMA);
         }
 
         //Число в памяти
-        private string MemoryCell = "0";
+        private double MemoryCell = 0.0;
+        public bool MemoryIsFull = false;
         public void MemoryRead()
         {
-            if (CurrentMemoryState != MemoryState.IsEmpty)
-            {
-                Accumulator = MemoryCell;
-            }
+            CurrentState = State.Answer;
+            if (MemoryIsFull)
+                CurrNumber = MemoryCell;
         }
         public void MemoryWrite()
         {
-            MemoryCell = Accumulator;
-            CurrentMemoryState = MemoryState.IsFull;
+            MemoryCell = (CurrentState == State.Answer) 
+                ? Accumulator : CurrNumber;
+            MemoryIsFull = true;
         }
         public void MemoryClear()
         {
-            MemoryCell = "0";
-            CurrentMemoryState = MemoryState.IsEmpty;
+            MemoryCell = 0.0;
+            MemoryIsFull = false;
         }
-        private enum MemoryState
-        {
-            IsEmpty, IsFull
-        }
-        private MemoryState CurrentMemoryState = MemoryState.IsEmpty;
         public void MemoryPlus()
         {
-            if (CurrentMemoryState == MemoryState.IsFull)
-            {
-                MemoryCell = Convert.ToString(
-                    Convert.ToDouble(MemoryCell) + Convert.ToDouble(Accumulator));
-            }
+            if (MemoryIsFull)
+                MemoryCell += CurrNumber;
         }
         public void MemoryMinus()
         {
-            if (CurrentMemoryState == MemoryState.IsFull)
-            {
-                MemoryCell = Convert.ToString(
-                    Convert.ToDouble(MemoryCell) - Convert.ToDouble(Accumulator));
-            }
+            if (MemoryIsFull)
+                MemoryCell -= CurrNumber;
         }
-        */
     }
 }

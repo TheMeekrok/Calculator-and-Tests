@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Windows7_Calc"
         mc:Ignorable="d"
-        Title="Калькулятор" ResizeMode="CanResize" WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Height="489" Width="304" Padding="15,15,15,15"
+        Title="Калькулятор" ResizeMode="CanResize" WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Height="495" Width="304" Padding="15,15,15,15"
     xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" Loaded="MainWindow1_Loaded">
     <Window.Resources>
         <Style x:Key="FocusVisual">
@@ -289,96 +289,93 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    <Grid VerticalAlignment="Center" Height="450">
+    <Grid VerticalAlignment="Center" Height="448">
         <Menu VerticalAlignment="Top" Height="20" Background="White" >
             <MenuItem Background="{x:Null}" BorderBrush="#00000000" Header="Вид" Margin="5,0,0,0">
-                <MenuItem x:Name="CommonModeBtn" Header="Обычный" Click="CommonModeBtn_Click"/>
-                <MenuItem x:Name="EngineerModeBtn" Header="Инженерный" Click="EngineerModeBtn_Click"/>
-                <Separator/>
                 <MenuItem Header="Журнал" Checked="MenuItem_Checked" IsCheckable="True" Visibility="Visible" Unchecked="MenuItem_Unchecked"/>
             </MenuItem>
             <MenuItem Background="{x:Null}" BorderBrush="#00000000" Header="Правка">
-                <MenuItem Header="Копировать"/>
-                <MenuItem Header="Вставить"/>
+                <MenuItem x:Name="MenuCopyBtn" Header="Копировать" Click="MenuCopyBtn_Click"/>
+                <MenuItem x:Name="MenuPasteBtn" Header="Вставить" Click="MenuPasteBtn_Click"/>
             </MenuItem>
         </Menu>
-        <ComboBox Style="{DynamicResource ComboBoxStyle1}" x:Name="HistoryBox" FontFamily="Segoe UI Light" FontSize="14" BorderBrush="{x:Null}" FontStyle="Italic" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" IsEditable="True" Focusable="False" Height="22" VerticalAlignment="Top" SelectionChanged="HistoryBox_SelectionChanged_1" Margin="16,31,16,0" Background="{x:Null}" Visibility="Visible" Panel.ZIndex="1">
-        </ComboBox>
-        <TextBox x:Name="MainText" Margin="15,34,15,0" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="Segoe UI Light" Height="88" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom" FontSize="38" FontWeight="Normal" FontStyle="Normal" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" SelectionOpacity="0" Background="#FFDBE7EE" Focusable="False" Text="0">
+        <ComboBox x:Name="Journal" FontFamily="Segoe UI Light" FontSize="14" BorderBrush="{x:Null}" FontStyle="Italic" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Focusable="False" Height="22" VerticalAlignment="Top" Margin="16,121,16,0" Background="{x:Null}" Visibility="Collapsed" Panel.ZIndex="1" ScrollViewer.HorizontalScrollBarVisibility="Visible" FlowDirection="LeftToRight" IsEditable="True" IsReadOnly="True" SelectionChanged="Journal_SelectionChanged"/>
+        <TextBox x:Name="MainText" Margin="15,26,15,0" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="Segoe UI Light" Height="88" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom" FontSize="38" FontWeight="Normal" FontStyle="Normal" BorderBrush="{x:Null}" SelectionBrush="{x:Null}" SelectionOpacity="0" Background="#FFDBE7EE" Focusable="False" Text="0">
             <TextBox.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </TextBox.Resources>
         </TextBox>
-        <Button x:Name="MemoryClearButton" Content="MC" Margin="15,144,0,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Click="MemoryClearButton_Click">
+        <Button x:Name="MemoryClearButton" Content="MC" Margin="15,153,0,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Click="MemoryClearButton_Click">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
-        <Button x:Name="MemoryReadButton" Content="MR" Margin="68,144,0,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Click="MemoryReadButton_Click">
+        <Button x:Name="MemoryReadButton" Content="MR" Margin="68,153,0,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Click="MemoryReadButton_Click">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
-        <Button x:Name="MemorySaveButton" Content="MS" Margin="122,144,0,0" HorizontalAlignment="Left" Width="45" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemorySaveButton_Click">
+        <Button x:Name="MemorySaveButton" Content="MS" Margin="122,153,0,0" HorizontalAlignment="Left" Width="45" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemorySaveButton_Click">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
-        <Button x:Name="MemoryPlusButton" Content="M+" Margin="178,144,0,0" HorizontalAlignment="Left" Width="45" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemoryPlusButton_Click">
+        <Button x:Name="MemoryPlusButton" Content="M+" Margin="178,153,0,0" HorizontalAlignment="Left" Width="45" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemoryPlusButton_Click">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
-        <Button x:Name="MemoryMinusButton" Content="M-" Margin="230,144,15,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemoryMinusButton_Click" Width="45" HorizontalAlignment="Left">
+        <Button x:Name="MemoryMinusButton" Content="M-" Margin="230,153,0,0" FontSize="15" Height="31" VerticalAlignment="Top" Background="#FFA7DEFF" BorderBrush="{x:Null}" FontFamily="Segoe UI Light" Click="MemoryMinusButton_Click" Width="45" HorizontalAlignment="Left">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
-        
-        <Button x:Name="Back" Content="←" Margin="15,185,0,0" FontSize="18" FontFamily="Segoe UI" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="Back_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="EraseAll" Content="СЕ" Margin="68,185,0,0" FontSize="18" FontFamily="Segoe UI" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="EraseAll_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="Erase" Content="С" Margin="122,185,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI" Height="45" VerticalAlignment="Top" Click="Erase_Click" BorderBrush="{x:Null}" Focusable="False"/>
-        <Button x:Name="Plus_Min" Content="±" Margin="178,185,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Plus_Min_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
-        <Button x:Name="Divide" Content="÷" Margin="230,185,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Divide_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
 
-        <Button x:Name="B7" Content="7" Margin="15,236,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B7_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B8" Content="8" Margin="68,236,0,0" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="B8_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B9" Content="9" Margin="122,236,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B9_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="Sqrt" Content="√" Margin="178,236,0,0" FontSize="18" Height="45" VerticalAlignment="Top" Click="Sqrt_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" HorizontalAlignment="Left" Width="45"/>
-        <Button x:Name="Multiply" Content="×" Margin="230,236,0,0" FontSize="18" Height="45" VerticalAlignment="Top" Click="Multiply_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" HorizontalAlignment="Left" Width="45"/>
+        <Button x:Name="Back" Content="←" Margin="15,191,0,0" FontSize="18" FontFamily="Segoe UI" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="Back_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="EraseAll" Content="СЕ" Margin="68,191,0,0" FontSize="18" FontFamily="Segoe UI" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="EraseAll_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="Erase" Content="С" Margin="122,191,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI" Height="45" VerticalAlignment="Top" Click="Erase_Click" BorderBrush="{x:Null}" Focusable="False"/>
+        <Button x:Name="Plus_Min" Content="±" Margin="178,191,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Plus_Min_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="Divide" Content="÷" Margin="230,191,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Divide_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
 
-        <Button x:Name="B4" Content="4" Margin="15,287,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B4_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B5" Content="5" Margin="68,287,0,0" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="B5_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B6" Content="6" Margin="122,287,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B6_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="OneDivide" Content="1/x" Margin="178,287,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="OneDivide_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
-        <Button x:Name="Minus" Content="-" Margin="230,287,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Minus_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="B7" Content="7" Margin="15,242,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B7_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B8" Content="8" Margin="68,242,0,0" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="B8_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B9" Content="9" Margin="122,242,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B9_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="Sqrt" Content="√" Margin="178,242,0,0" FontSize="18" Height="45" VerticalAlignment="Top" Click="Sqrt_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" HorizontalAlignment="Left" Width="45"/>
+        <Button x:Name="Multiply" Content="×" Margin="230,242,0,0" FontSize="18" Height="45" VerticalAlignment="Top" Click="Multiply_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" HorizontalAlignment="Left" Width="45"/>
 
-        <Button x:Name="B1" Content="1" Margin="15,337,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B1_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B2" Content="2" Margin="68,337,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B2_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="B3" Content="3" Margin="122,337,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B3_Click" BorderBrush="{x:Null}"/>
-        <Button x:Name="Percent" Content="%" Margin="178,337,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Percent_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
-        <Button x:Name="Plus" Content="+" Margin="230,337,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Plus_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="B4" Content="4" Margin="15,293,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B4_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B5" Content="5" Margin="68,293,0,0" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45" Click="B5_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B6" Content="6" Margin="122,293,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B6_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="OneDivide" Content="1/x" Margin="178,293,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="OneDivide_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="Minus" Content="-" Margin="230,293,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Minus_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
 
-        <Button x:Name="B0" Content="0" Margin="15,388,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="98" Height="45" VerticalAlignment="Top" Click="B0_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
-        <Button x:Name="Comma" Content="," Margin="122,388,0,0" FontSize="18" FontFamily="Segoe UI Light" Click="Comma_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45"/>
-        <Button x:Name="Equals" Content="=" Margin="178,388,0,0" HorizontalAlignment="Left" Width="97" FontSize="18" Height="45" VerticalAlignment="Top" Click="Equals_Click" Background="#FFA7DEFF" Foreground="Black" BorderBrush="{x:Null}">
+        <Button x:Name="B1" Content="1" Margin="15,343,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B1_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B2" Content="2" Margin="68,343,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="45" Height="45" VerticalAlignment="Top" Click="B2_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="B3" Content="3" Margin="122,343,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" FontFamily="Segoe UI Light" Height="45" VerticalAlignment="Top" Click="B3_Click" BorderBrush="{x:Null}"/>
+        <Button x:Name="Percent" Content="%" Margin="178,343,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Percent_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="Plus" Content="+" Margin="230,343,0,0" HorizontalAlignment="Left" Width="45" FontSize="18" Height="45" VerticalAlignment="Top" Click="Plus_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+
+        <Button x:Name="B0" Content="0" Margin="15,394,0,0" FontSize="18" FontFamily="Segoe UI Light" HorizontalAlignment="Left" Width="98" Height="45" VerticalAlignment="Top" Click="B0_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}"/>
+        <Button x:Name="Comma" Content="," Margin="122,394,0,0" FontSize="18" FontFamily="Segoe UI Light" Click="Comma_Click" Background="#FFDBE7EE" BorderBrush="{x:Null}" Height="45" VerticalAlignment="Top" HorizontalAlignment="Left" Width="45"/>
+        <Button x:Name="Equals" Content="=" Margin="178,394,0,0" HorizontalAlignment="Left" Width="97" FontSize="18" Height="45" VerticalAlignment="Top" Click="Equals_Click" Background="#FFA7DEFF" Foreground="Black" BorderBrush="{x:Null}">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="5"/>
                 </Style>
             </Button.Resources>
         </Button>
+        <Label x:Name="HistoryBox" HorizontalAlignment="Center" Margin="0,26,0,0" VerticalAlignment="Top" Width="258" HorizontalContentAlignment="Right" VerticalContentAlignment="Bottom" Height="27"/>
     </Grid>
 </Window>
