@@ -142,17 +142,46 @@ namespace Windows7_Calc
             { "IncorrentInput", "Неверный ввод" }
         };
 
-        public void Addition()
+        private void OperationHandle(State State)
         {
+            switch (State)
+            {
+                case State.Add:
+                    Accumulator += CurrNumber;
+                    break;
+
+                case State.Subs:
+                    Accumulator -= CurrNumber;
+                    break;
+
+                case State.Mult:
+                    Accumulator *= CurrNumber;
+                    break;
+
+                case State.Div:
+                    if (CurrNumber == 0.0)
+                    {
+                        CurrentState = State.Error;
+                        CurrentExpression = "";
+                        CurrentError = Errors["DivisionByZero"];
+                        return;
+                    }
+
+                    Accumulator /= CurrNumber;
+                    break;
+            }
+
             IsAddComma = IsReversed = false;
 
-            if (CurrentState == State.N || CurrentState == State.Answer)
+            if (State == State.N || State == State.Answer)
                 Accumulator = CurrNumber;
 
-            else
-                Accumulator += CurrNumber;
-
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+        }
+
+        public void Addition()
+        {
+            OperationHandle(CurrentState);
 
             CurrentExpression += Buffer.ToString() + " "
                 + Operations["Plus"] + " ";
@@ -162,15 +191,7 @@ namespace Windows7_Calc
         }
         public void Subtraction()
         {
-            IsAddComma = IsReversed = false;
-
-            if (CurrentState == State.N || CurrentState == State.Answer)
-                Accumulator = CurrNumber;
-
-            else
-                Accumulator -= CurrNumber;
-
-            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+            OperationHandle(CurrentState);
 
             CurrentExpression += Buffer.ToString() + " "
                 + Operations["Minus"] + " ";
@@ -180,15 +201,7 @@ namespace Windows7_Calc
         }
         public void Multiplication()
         {
-            IsAddComma = IsReversed = false;
-
-            if (CurrentState == State.N || CurrentState == State.Answer)
-                Accumulator = CurrNumber;
-
-            else
-                Accumulator *= CurrNumber;
-
-            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+            OperationHandle(CurrentState);
 
             CurrentExpression += Buffer.ToString() + " "
                 + Operations["Multiplication"] + " ";
@@ -198,24 +211,7 @@ namespace Windows7_Calc
         }
         public void Division()
         {
-            IsAddComma = IsReversed = false;
-
-            if (CurrentState == State.N || CurrentState == State.Answer)
-                Accumulator = CurrNumber;
-
-            else
-            {
-                if (CurrNumber == 0)
-                {
-                    CurrentState = State.Error;
-                    CurrentExpression = "";
-                    CurrentError = Errors["DivisionByZero"];
-                    return;
-                }
-                Accumulator /= CurrNumber;
-            }
-
-            Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
+            OperationHandle(CurrentState);
 
             CurrentExpression += Buffer.ToString() + " "
                 + Operations["Division"] + " ";
@@ -283,7 +279,7 @@ namespace Windows7_Calc
         {
             if (CurrNumber < 0)
             {
-                CurrNumber = 0.0;
+                CurrNumber = Accumulator = 0.0;
                 CurrentState = State.Error;
                 CurrentError = Errors["IncorrentInput"];
                 return;
