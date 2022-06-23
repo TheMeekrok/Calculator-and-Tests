@@ -30,13 +30,19 @@ namespace Windows7_Calc
             return CurrentState == State.Error;
         }
 
-        bool IsAddComma = false;
+        bool IsAddComma = false, CanChangeNum = true;
         public void AddComma()
         {
             IsAddComma = true;
         }
         public void AddDigit(string Digit)
         {
+            if (!CanChangeNum)
+            {
+                CanChangeNum = true;
+                CurrNumber = Buffer = 0;
+            }
+
             if (CurrentState == State.Answer
                 || CurrentState == State.Error)
             {
@@ -82,10 +88,11 @@ namespace Windows7_Calc
         {
             IsAddComma = false;
 
-            if (CurrentState == State.Answer)
-                return;
-
             string _CurrNumber = CurrNumber.ToString();
+
+
+            if (CurrentState == State.Answer || _CurrNumber.Contains("E"))
+                return;
 
             if (_CurrNumber.Length >= 2)
                 _CurrNumber = _CurrNumber.Remove(_CurrNumber.Length - 1, 1);
@@ -146,6 +153,14 @@ namespace Windows7_Calc
         {
             switch (State)
             {
+                case State.N:
+                    Accumulator = CurrNumber;
+                    break;
+
+                case State.Answer:
+                    Accumulator = CurrNumber;
+                    break;
+
                 case State.Add:
                     Accumulator += CurrNumber;
                     break;
@@ -169,12 +184,18 @@ namespace Windows7_Calc
 
                     Accumulator /= CurrNumber;
                     break;
+
+                case State.Sqr:
+                    Accumulator = CurrNumber;
+                    break;
+
+                case State.Rev:
+                    Accumulator = CurrNumber;
+                    break;
             }
 
             IsAddComma = IsReversed = false;
-
-            if (State == State.N || State == State.Answer)
-                Accumulator = CurrNumber;
+            CanChangeNum = false;
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
         }
@@ -187,7 +208,6 @@ namespace Windows7_Calc
                 + Operations["Plus"] + " ";
 
             CurrentState = State.Add;
-            CurrNumber = Buffer = 0.0;
         }
         public void Subtraction()
         {
@@ -197,7 +217,7 @@ namespace Windows7_Calc
                 + Operations["Minus"] + " ";
 
             CurrentState = State.Subs;
-            CurrNumber = Buffer = 0.0;
+           
         }
         public void Multiplication()
         {
@@ -207,7 +227,7 @@ namespace Windows7_Calc
                 + Operations["Multiplication"] + " ";
 
             CurrentState = State.Mult;
-            CurrNumber = Buffer = 0.0;
+            
         }
         public void Division()
         {
@@ -217,7 +237,7 @@ namespace Windows7_Calc
                 + Operations["Division"] + " ";
 
             CurrentState = State.Div;
-            CurrNumber = Buffer = 0.0;
+           
         }
 
         //История операций
@@ -263,11 +283,11 @@ namespace Windows7_Calc
 
             Accumulator = Math.Round(Accumulator, MAX_DIGITS_AFTER_COMMA);
 
-            CurrentState = State.Answer;
+            //CurrentState = State.Answer;
             CurrentExpression = "";
 
             CalcHistory.Add(Accumulator.ToString());
-            CurrNumber = Buffer = Accumulator;
+            //CurrNumber = Buffer = Accumulator;
         }
 
         public void SignSwitch()
@@ -280,6 +300,7 @@ namespace Windows7_Calc
             if (CurrNumber < 0)
             {
                 CurrNumber = Accumulator = 0.0;
+
                 CurrentState = State.Error;
                 CurrentError = Errors["IncorrentInput"];
                 return;
@@ -334,9 +355,11 @@ namespace Windows7_Calc
         public bool MemoryIsFull = false;
         public void MemoryRead()
         {
-            CurrentState = State.Answer;
             if (MemoryIsFull)
-                CurrNumber = MemoryCell;
+            {
+                CurrentState = State.Answer;
+                CurrNumber = Buffer = MemoryCell;
+            }
         }
         public void MemoryWrite()
         {

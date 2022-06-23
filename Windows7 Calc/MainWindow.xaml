@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Windows7_Calc"
         mc:Ignorable="d"
-        Title="Калькулятор" ResizeMode="CanResize" WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Height="495" Width="304" Padding="15,15,15,15"
+        Title="Калькулятор" ResizeMode="NoResize" WindowStyle="SingleBorderWindow" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" Height="495" Width="304" Padding="15,15,15,15"
     xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" Loaded="MainWindow1_Loaded">
     <Window.Resources>
         <Style x:Key="FocusVisual">
